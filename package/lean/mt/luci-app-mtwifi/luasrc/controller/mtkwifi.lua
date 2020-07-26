@@ -120,9 +120,9 @@ function dev_cfg(devname)
     if mimo == "0" then
         cfgs.ETxBfEnCond=1
         cfgs.MUTxRxEnable=0
-        cfgs.ITxBfEn=0
+        cfgs.ITxBfEn=1
     elseif mimo == "1" then
-        cfgs.ETxBfEnCond=0
+        cfgs.ETxBfEnCond=1
         cfgs.MUTxRxEnable=0
         cfgs.ITxBfEn=1
     elseif mimo == "2" then
@@ -131,24 +131,16 @@ function dev_cfg(devname)
         cfgs.ITxBfEn=1
     elseif mimo == "3" then
         cfgs.ETxBfEnCond=1
-        if tonumber(cfgs.ApCliEnable) == 1 then
-            cfgs.MUTxRxEnable=3
-        else
-            cfgs.MUTxRxEnable=1
-        end
-        cfgs.ITxBfEn=0
+        cfgs.MUTxRxEnable=0
+        cfgs.ITxBfEn=1
     elseif mimo == "4" then
         cfgs.ETxBfEnCond=1
-        if tonumber(cfgs.ApCliEnable) == 1 then
-            cfgs.MUTxRxEnable=3
-        else
-            cfgs.MUTxRxEnable=1
-        end
+        cfgs.MUTxRxEnable=0
         cfgs.ITxBfEn=1
     else
-        cfgs.ETxBfEnCond=0
-        cfgs.MUTxRxEnable=0
-        cfgs.ITxBfEn=0
+       cfgs.ETxBfEnCond=1
+       cfgs.MUTxRxEnable=0
+       cfgs.ITxBfEn=1
     end
 
 --    if cfgs.ApCliEnable == "1" then
@@ -777,14 +769,14 @@ function apcli_connect(dev, vif)
     mtkwifi.save_profile(cfgs, profiles[devname])
 
     os.execute("ifconfig "..vifname.." up")
-    local brvifs = mtkwifi.__trim(mtkwifi.read_pipe("uci get network.lan.ifname"))
-    if not string.match(brvifs, vifname) then
-        brvifs = brvifs.." "..vifname
-        nixio.syslog("debug", "add "..vifname.." into lan")
-        os.execute("uci set network.lan.ifname=\""..brvifs.."\"")
-        os.execute("uci commit")
-        os.execute("ubus call network.interface.lan add_device \"{\\\"name\\\":\\\""..vifname.."\\\"}\"")
-    end
+--    local brvifs = mtkwifi.__trim(mtkwifi.read_pipe("uci get network.lan.ifname"))
+--    if not string.match(brvifs, vifname) then
+--        brvifs = brvifs.." "..vifname
+--        nixio.syslog("debug", "add "..vifname.." into lan")
+--        os.execute("uci set network.lan.ifname=\""..brvifs.."\"")
+--        os.execute("uci commit")
+--        os.execute("ubus call network.interface.lan add_device \"{\\\"name\\\":\\\""..vifname.."\\\"}\"")
+--    end
 
     os.execute("iwpriv "..vifname.." set MACRepeaterEn="..cfgs.MACRepeaterEn)
     os.execute("iwpriv "..vifname.." set ApCliEnable=0")
@@ -823,14 +815,14 @@ function apcli_disconnect(dev, vif)
 
     os.execute("iwpriv "..vifname.." set ApCliEnable=0")
 
-    local brvifs = mtkwifi.__trim(mtkwifi.read_pipe("uci get network.lan.ifname"))
-    if string.match(brvifs, vifname) then
-        brvifs = mtkwifi.__trim(string.gsub(brvifs, vifname, ""))
-        nixio.syslog("debug", "add "..vifname.." into lan")
-        os.execute("uci set network.lan.ifname=\""..brvifs.."\"")
-        os.execute("uci commit")
-        os.execute("ubus call network.interface.lan remove_device \"{\\\"name\\\":\\\""..vifname.."\\\"}\"")
-    end
+--    local brvifs = mtkwifi.__trim(mtkwifi.read_pipe("uci get network.lan.ifname"))
+--    if string.match(brvifs, vifname) then
+--        brvifs = mtkwifi.__trim(string.gsub(brvifs, vifname, ""))
+--        nixio.syslog("debug", "add "..vifname.." into lan")
+--        os.execute("uci set network.lan.ifname=\""..brvifs.."\"")
+--        os.execute("uci commit")
+--        os.execute("ubus call network.interface.lan remove_device \"{\\\"name\\\":\\\""..vifname.."\\\"}\"")
+--    end
     os.execute("ifconfig "..vifname.." down")
 
     luci.http.redirect(luci.dispatcher.build_url("admin", "network", "wifi"))
